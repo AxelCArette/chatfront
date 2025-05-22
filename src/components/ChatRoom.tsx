@@ -1,7 +1,7 @@
 // components/ChatRoom.tsx
 import React, { useEffect, useState } from "react";
 import type { Message, Room } from "../types";
-import MessageList from "./MessageList";
+import MessageList from "./ChatRoom/MessageList";
 import MessageInput from "./MessageInput";
 
 type ChatRoomProps = {
