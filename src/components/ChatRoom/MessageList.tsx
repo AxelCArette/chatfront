@@ -18,25 +18,32 @@ const MessageList: React.FC<Props> = ({ messages, username, currentRoom }) => {
   }, [messages]);
 
   if (!currentRoom) return <NoRoomSelected />;
-  if (messages.length === 0) return <EmptyRoom />;
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gradient-to-br from-blue-50/30 to-indigo-50/30 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {messages.map((msg, i) => {
-          const isUser = msg.username === username;
-          const isFirstMessage = i === 0 || messages[i - 1].username !== msg.username;
+    <div className="flex-1 h-full relative">
+      <div className="absolute inset-0 overflow-y-auto bg-gradient-to-br from-blue-50/30 to-indigo-50/30 p-6 scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-transparent">
+        <div className="max-w-4xl mx-auto space-y-6 min-h-full">
+          {messages.length === 0 ? (
+            <EmptyRoom />
+          ) : (
+            <>
+              {messages.map((msg, i) => {
+                const isUser = msg.username === username;
+                const isFirstMessage = i === 0 || messages[i - 1].username !== msg.username;
 
-          return (
-            <MessageItem
-              key={i}
-              message={msg}
-              isUser={isUser}
-              isFirstMessage={isFirstMessage}
-            />
-          );
-        })}
-        <div ref={endRef} />
+                return (
+                  <MessageItem
+                    key={i}
+                    message={msg}
+                    isUser={isUser}
+                    isFirstMessage={isFirstMessage}
+                  />
+                );
+              })}
+            </>
+          )}
+          <div ref={endRef} />
+        </div>
       </div>
     </div>
   );

@@ -26,7 +26,14 @@ export const useChatSocket = (roomId: string | null) => {
 
         case "new_message":
           if (data.room_id === roomId) {
-            setMessages((prev) => [...prev, data as Message]);
+            const newMsg: Message = {
+              _id: data._id || crypto.randomUUID(),
+              username: data.username,
+              message: data.message,
+              room_id: data.room_id,
+              timestamp: data.timestamp || new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, newMsg]);
           }
           break;
 
