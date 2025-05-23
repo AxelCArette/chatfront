@@ -1,4 +1,4 @@
-// components/ChatRoom.tsx
+
 import React, { useEffect, useState } from "react";
 import type { Message, Room } from "../types";
 import MessageList from "./ChatRoom/MessageList";
@@ -21,6 +21,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ room, username, socket }) => {
 
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
+      console.log('[WS] recu:', data);
+
 
       if (data.action === "room_messages" && data.room_id === room._id) {
         setMessages(data.messages);

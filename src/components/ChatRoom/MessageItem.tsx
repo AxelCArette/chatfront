@@ -1,7 +1,4 @@
-import React from "react";
 import type { Message } from "../../types";
-import UserHeader from "./UserHeader";
-import MessageBubble from "./MessageBubble";
 
 type Props = {
   message: Message;
@@ -10,13 +7,44 @@ type Props = {
 };
 
 const MessageItem: React.FC<Props> = ({ message, isUser, isFirstMessage }) => {
+  const formatTime = (timestamp?: string) => {
+    if (!timestamp) return "";
+    
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString('fr-FR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    } catch {
+      return "";
+    }
+  };
+
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"} group`}>
-      <div className={`relative max-w-md lg:max-w-lg ${isUser ? "order-2" : "order-1"}`}>
-        {isFirstMessage && (
-          <UserHeader username={message.username} isUser={isUser} />
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} group`}>
+      <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+        isUser 
+          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' 
+          : 'bg-white/80 backdrop-blur-sm text-gray-800 shadow-md border border-white/20'
+      }`}>
+        {isFirstMessage && !isUser && (
+          <p className="text-xs font-semibold text-gray-600 mb-1">
+            {message.username}
+          </p>
         )}
-        <MessageBubble message={message} isUser={isUser} isFirstMessage={isFirstMessage} />
+        
+        <p className="text-sm leading-relaxed break-words">
+          {message.message}
+        </p>
+        
+        {message.timestamp && (
+          <p className={`text-xs mt-2 ${
+            isUser ? 'text-blue-100' : 'text-gray-500'
+          } opacity-0 group-hover:opacity-100 transition-opacity`}>
+            {formatTime(message.timestamp)}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -1,94 +1,127 @@
 import React, { useState } from "react";
 import type { Room } from "../types";
-import { PlusCircle, Hash, User } from "lucide-react";
+import { PlusCircle, Hash, User, LogOut } from "lucide-react";
 
 type Props = {
   username: string;
   setUsername: (name: string) => void;
   currentRoom: Room | null;
-  onCreateRoom: (name: string) => void;
+  onCreateRoom: (name: string, username: string) => void;
+  onLeaveRoom: () => void;
 };
 
-const ChatHeader: React.FC<Props> = ({ username, setUsername, currentRoom, onCreateRoom }) => {
+const ChatHeader: React.FC<Props> = ({
+  username,
+  setUsername,
+  currentRoom,
+  onCreateRoom,
+  onLeaveRoom
+}) => {
   const [newRoomName, setNewRoomName] = useState("");
 
   const handleCreateRoom = () => {
     if (newRoomName.trim()) {
-      onCreateRoom(newRoomName.trim());
+      onCreateRoom(newRoomName.trim(), username);
       setNewRoomName("");
     }
   };
 
   return (
-    <div className="relative bg-gradient-to-r from-white via-blue-50 to-indigo-50 border-b border-white/30 shadow-lg backdrop-blur-sm">
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5"></div>
-      <div className="relative flex flex-col lg:flex-row items-center justify-between px-8 py-6 gap-6">
-        
-        {/* Titre du salon actuel */}
-        <div className="flex items-center gap-3 w-full lg:w-auto text-center lg:text-left">
-          {currentRoom ? (
-            <>
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-                <Hash className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  {currentRoom.name}
-                </h1>
-                <p className="text-sm text-gray-500">Salon de discussion</p>
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl shadow-lg">
-                <Hash className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-600">
-                  Sélectionne un salon
-                </h1>
-                <p className="text-sm text-gray-400">Commence par choisir un salon</p>
-              </div>
-            </div>
-          )}
-        </div>
+    <header className="relative bg-gradient-to-r from-white to-blue-50 border-b border-white/40 shadow-lg backdrop-blur-md animate-fade-in">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 pointer-events-none" />
+      <div className="relative px-6 py-4 flex items-center justify-between gap-6 flex-wrap">
 
-        {/* Création de salon */}
-        <div className="flex items-center gap-3 w-full lg:w-auto">
-          <div className="relative flex-1 lg:flex-none">
+        {/* Pseudo */}
+        <div className="flex flex-col w-48">
+          <label className="text-sm text-gray-600 font-medium mb-1">Ton pseudo</label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              placeholder="Nouveau salon..."
-              value={newRoomName}
-              onChange={(e) => setNewRoomName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleCreateRoom()}
-              className="w-full lg:w-64 bg-white/80 backdrop-blur-sm border border-white/40 px-4 py-3 rounded-2xl text-sm shadow-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 placeholder-gray-400"
+              placeholder="ex : Loki"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full bg-white/80 backdrop-blur-md border border-white/40 pl-9 pr-3 py-2 rounded-xl text-sm shadow focus:ring-2 focus:ring-indigo-400 placeholder-gray-400 transition"
             />
+            {username.trim() === "" && (
+              <p className="text-xs text-red-500 mt-1">Un pseudo est requis !</p>
+            )}
           </div>
-          <button
-            onClick={handleCreateRoom}
-            className="group p-3 bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-2xl text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-            title="Créer un salon"
-          >
-            <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-          </button>
         </div>
 
-        {/* Champ utilisateur */}
-        <div className="relative w-full lg:w-auto">
-          <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-            <User className="w-4 h-4 text-gray-400" />
+        {/* Créer un salon */}
+        {!currentRoom && (
+          <div className="flex flex-col w-64">
+            <label className="text-sm text-gray-600 font-medium mb-1">Créer un salon</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Nom du salon..."
+                value={newRoomName}
+                onChange={(e) => setNewRoomName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCreateRoom()}
+                className="w-full bg-white/80 backdrop-blur-md border border-white/40 px-3 py-2 rounded-xl text-sm shadow focus:ring-2 focus:ring-blue-400 placeholder-gray-400 transition"
+              />
+              <button
+                onClick={handleCreateRoom}
+                className="relative group p-2 bg-gradient-to-br from-blue-500 to-indigo-600 
+                           hover:from-blue-600 hover:to-purple-600 hover:ring-2 hover:ring-blue-300
+                           hover:scale-105 transition-all duration-300 transform rounded-xl text-white shadow-md hover:shadow-xl"
+                title="Créer un salon"
+              >
+                <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                <span className="absolute -inset-1 rounded-xl bg-indigo-400 opacity-0 group-hover:opacity-20 transition" />
+              </button>
+            </div>
           </div>
-          <input
-            type="text"
-            placeholder="Ton pseudo..."
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full lg:w-48 bg-white/80 backdrop-blur-sm border border-white/40 pl-12 pr-4 py-3 rounded-2xl text-sm shadow-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-300 placeholder-gray-400"
-          />
+        )}
+
+        {/* Quitter un salon */}
+        {currentRoom && (
+          <div className="flex flex-col w-48">
+            <label className="text-sm text-gray-600 font-medium mb-1">Tu veux partir ?</label>
+            <button
+              onClick={onLeaveRoom}
+              className="flex items-center gap-2 justify-center 
+                         bg-red-500 hover:bg-red-600 hover:ring-2 hover:ring-red-300
+                         hover:scale-105 transition-all duration-300 transform text-white px-4 py-2 rounded-xl shadow hover:shadow-xl"
+            >
+              <LogOut className="w-5 h-5" />
+              Quitter
+            </button>
+          </div>
+        )}
+
+        {/* Affichage salon actuel */}
+        <div className="flex flex-col w-56">
+          <label className="text-sm text-gray-600 font-medium mb-1">Salon actuel</label>
+          <div className="flex items-center gap-3 bg-white/80 px-4 py-2 rounded-xl shadow border border-white/40">
+            <div
+              className={`p-2 rounded-xl transition-colors ${
+                currentRoom
+                  ? "bg-gradient-to-br from-blue-500 to-indigo-600"
+                  : "bg-gray-300"
+              }`}
+            >
+              <Hash className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h1
+                className={`text-sm font-semibold transition ${
+                  currentRoom
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
+                    : "text-gray-500"
+                }`}
+              >
+                {currentRoom ? currentRoom.name : "Aucun salon"}
+              </h1>
+              <p className="text-xs text-gray-400">Salon de discussion</p>
+            </div>
+          </div>
         </div>
+
       </div>
-    </div>
+    </header>
   );
 };
 

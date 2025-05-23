@@ -1,32 +1,53 @@
-import React from "react";
-import { Hash, Loader, Trash } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Hash, Trash } from "lucide-react";
 import type { Room } from "../../types";
+import { useRoomStore } from "../../stores/roomStore";
 
 type Props = {
-  rooms: Room[];
   currentRoom: Room | null;
   onSelectRoom: (room: Room) => void;
-  socket: WebSocket;
 };
 
 export const SidebarRoomList: React.FC<Props> = ({
-  rooms,
   currentRoom,
   onSelectRoom,
-  socket,
 }) => {
+  const rooms = useRoomStore((state) => state.rooms);
+  const socket = useRoomStore((state) => state.socket);
+  const [longLoading, setLongLoading] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!rooms.length) setLongLoading(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [rooms]);
+
   const handleDeleteRoom = (roomId: string) => {
-    socket.send(JSON.stringify({ action: "delete_room", room_id: roomId }));
+    if (socket) {
+      socket.send(JSON.stringify({ action: "delete_room", room_id: roomId }));
+    }
   };
 
-  if (rooms.length === 0) {
+  if (!rooms.length && !longLoading) {
     return (
       <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center h-64 text-center">
-        <div className="p-4 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl shadow-lg mb-4">
-          <Loader className="w-8 h-8 text-gray-400 animate-spin" />
-        </div>
+        <div className="text-5xl animate-bounce-slow mb-2">😴</div>
         <p className="text-gray-500 font-medium">Chargement des salons...</p>
-        <p className="text-sm text-gray-400 mt-1">Patiente un instant</p>
+        <p className="text-sm text-gray-400 mt-1">On cherche ton espace...</p>
+      </div>
+    );
+  }
+
+  if (!rooms.length && longLoading) {
+    return (
+      <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center h-64 text-center">
+        <div className="text-5xl mb-2">🪄</div>
+        <p className="text-gray-500 font-medium">Aucun salon trouvé</p>
+        <p className="text-sm text-gray-400 mt-1">
+          Tu peux en créer un pour commencer !
+        </p>
+
       </div>
     );
   }
@@ -83,11 +104,6 @@ export const SidebarRoomList: React.FC<Props> = ({
                 <Trash className="w-4 h-4" />
               </button>
             </div>
-            {isActive && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div className="w-2 h-8 bg-white rounded-full"></div>
-              </div>
-            )}
             {!isActive && (
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-blue-50/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
             )}

@@ -1,28 +1,27 @@
 import React from "react";
-import type { Room } from "../../types";
+import { useRoomStore } from "../../stores/roomStore";
 import { SidebarHeader } from "./SidebarHeader";
 import { SidebarRoomList } from "./SidebarRoomList";
 import { SidebarMobileToggle } from "./SidebarMobileToggle";
 import { SidebarFooter } from "./SidebarFooter";
 import { SidebarOverlay } from "./SidebarOverlay";
+import type { Room } from "../../types";
 
 type Props = {
-  rooms: Room[];
   currentRoom: Room | null;
   onSelectRoom: (room: Room) => void;
   showSidebar: boolean;
   toggleSidebar: () => void;
-  socket: WebSocket;
 };
 
 const Sidebar: React.FC<Props> = ({
-  rooms,
   currentRoom,
   onSelectRoom,
   showSidebar,
   toggleSidebar,
-  socket,
 }) => {
+  const rooms = useRoomStore((state) => state.rooms); // 👈 via Zustand
+
   return (
     <>
       <SidebarMobileToggle showSidebar={showSidebar} toggleSidebar={toggleSidebar} />
@@ -34,10 +33,8 @@ const Sidebar: React.FC<Props> = ({
       >
         <SidebarHeader rooms={rooms} />
         <SidebarRoomList
-          rooms={rooms}
           currentRoom={currentRoom}
           onSelectRoom={onSelectRoom}
-          socket={socket}
         />
         <SidebarFooter />
       </aside>
