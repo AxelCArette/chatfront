@@ -1,8 +1,9 @@
-
-import React, { useEffect, useState } from "react";
-import type { Message, Room } from "../types";
+import React, { useState } from "react";
+import type { Room } from "../types";
 import MessageList from "./ChatRoom/MessageList";
 import MessageInput from "./MessageInput";
+import { useChatSocket } from "../hooks/useChatSocket";
+
 
 type ChatRoomProps = {
   room: Room;
@@ -10,57 +11,27 @@ type ChatRoomProps = {
   socket: WebSocket;
 };
 
-const ChatRoom: React.FC<ChatRoomProps> = ({ room, username, socket }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+const ChatRoom: React.FC<ChatRoomProps> = ({ room, username }) => {
+  const { messages, sendMessage } = useChatSocket(room._id);
   const [inputMessage, setInputMessage] = useState("");
 
-  useEffect(() => {
-    // Clear messages and request new ones when room changes
-    setMessages([]);
-    socket.send(JSON.stringify({ action: "get_messages", room_id: room._id }));
-
-    const handleMessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
-      console.log('[WS] recu:', data);
-
-
-      if (data.action === "room_messages" && data.room_id === room._id) {
-        setMessages(data.messages);
-      }
-
-      if (data.action === "new_message" && data.room_id === room._id) {
-        setMessages((prev) => [
-          ...prev,
-          { username: data.username, message: data.message },
-        ]);
-      }
-    };
-
-    socket.addEventListener("message", handleMessage);
-    return () => socket.removeEventListener("message", handleMessage);
-  }, [room, socket]);
-
-  const sendMessage = () => {
+  const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
-
-    socket.send(
-      JSON.stringify({
-        action: "send_message",
-        message: inputMessage,
-        room_id: room._id,
-        username,
-      })
-    );
+    sendMessage(username, inputMessage);
     setInputMessage("");
   };
 
   return (
     <div className="flex-1 flex flex-col backdrop-blur-sm bg-white/70 rounded-l-2xl shadow-2xl border border-white/20">
-      <MessageList messages={messages} username={username} currentRoom={room} />
+      <MessageList
+        messages={messages}
+        username={username}
+        currentRoom={room}
+      />
       <MessageInput
         inputMessage={inputMessage}
         setInputMessage={setInputMessage}
-        sendMessage={sendMessage}
+        sendMessage={handleSendMessage}
         username={username}
         currentRoom={room}
       />

@@ -24,4 +24,5 @@ export type ChatState = {
   messages: Message[];
   currentRoom: Room | null;
   username: string;
+  
 };

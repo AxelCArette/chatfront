@@ -6,10 +6,11 @@ import { useRoomStore } from "../stores/roomStore";
 type Props = {
   currentRoom: Room | null;
   username: string;
+  
 };
 
 const ChatMainView: React.FC<Props> = ({ currentRoom, username }) => {
-  const socket = useRoomStore((state) => state.socket); // 👈 socket depuis store
+  const socket = useRoomStore((state) => state.socket);
 
   if (!currentRoom || !socket) {
     return (

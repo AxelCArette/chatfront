@@ -30,8 +30,6 @@ const ChatHeader: React.FC<Props> = ({
     <header className="relative bg-gradient-to-r from-white to-blue-50 border-b border-white/40 shadow-lg backdrop-blur-md animate-fade-in">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 pointer-events-none" />
       <div className="relative px-6 py-4 flex items-center justify-between gap-6 flex-wrap">
-
-        {/* Pseudo */}
         <div className="flex flex-col w-48">
           <label className="text-sm text-gray-600 font-medium mb-1">Ton pseudo</label>
           <div className="relative">
@@ -49,7 +47,6 @@ const ChatHeader: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Créer un salon */}
         {!currentRoom && (
           <div className="flex flex-col w-64">
             <label className="text-sm text-gray-600 font-medium mb-1">Créer un salon</label>
@@ -76,7 +73,6 @@ const ChatHeader: React.FC<Props> = ({
           </div>
         )}
 
-        {/* Quitter un salon */}
         {currentRoom && (
           <div className="flex flex-col w-48">
             <label className="text-sm text-gray-600 font-medium mb-1">Tu veux partir ?</label>
@@ -92,7 +88,6 @@ const ChatHeader: React.FC<Props> = ({
           </div>
         )}
 
-        {/* Affichage salon actuel */}
         <div className="flex flex-col w-56">
           <label className="text-sm text-gray-600 font-medium mb-1">Salon actuel</label>
           <div className="flex items-center gap-3 bg-white/80 px-4 py-2 rounded-xl shadow border border-white/40">
@@ -119,7 +114,6 @@ const ChatHeader: React.FC<Props> = ({
             </div>
           </div>
         </div>
-
       </div>
     </header>
   );

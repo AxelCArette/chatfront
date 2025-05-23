@@ -1,73 +1,61 @@
 import { useEffect, useRef, useState } from "react";
-import type { Room } from "../types";
+import type { Message } from "@/types";
 
-export function useChatSocket(username: string) {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
+export const useChatSocket = (roomId: string | null) => {
   const socketRef = useRef<WebSocket | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    socketRef.current = new WebSocket("ws://localhost:8888/ws/chat");
+    if (!roomId) return;
 
-    socketRef.current.onopen = () => {
-      socketRef.current?.send(JSON.stringify({ action: "get_rooms" }));
+    const socket = new WebSocket("ws://localhost:8888/ws/chat");
+    socketRef.current = socket;
+
+    socket.onopen = () => {
+      console.log("[WS Chat] ✅ Connecté");
+      socket.send(JSON.stringify({ action: "get_messages", room_id: roomId }));
     };
 
-    socketRef.current.onmessage = (event: MessageEvent) => {
+    socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       switch (data.action) {
-        case "rooms_list":
-          setRooms(data.rooms);
+        case "room_messages":
+          setMessages(data.messages || []);
           break;
 
-        case "room_created":
-          if (data.room) {
-            setRooms((prev) => [...prev, data.room]);
-            setActiveRoomId(data.room._id); // deviens actif direct
+        case "new_message":
+          if (data.room_id === roomId) {
+            setMessages((prev) => [...prev, data as Message]);
           }
           break;
 
-        case "room_deleted":
-          setRooms((prev) => prev.filter((room) => room._id !== data.room_id));
-          if (activeRoomId === data.room_id) {
-            setActiveRoomId(null); // on reset si le salon actif est supprimé
-          }
-          break;
-
+        default:
+          console.warn("[WS Chat] ⚠️ Action inconnue :", data.action);
       }
     };
 
-    return () => socketRef.current?.close();
-  }, [activeRoomId]);
+    socket.onclose = () => {
+      console.log("[WS Chat] ❌ Déconnecté");
+    };
 
-  const createRoom = (name: string) => {
-    if (!name.trim()) return;
-    socketRef.current?.send(
-      JSON.stringify({
-        action: "create_room",
-        room_name: name,
-        username,
-      })
-    );
+    return () => {
+      socket.close();
+    };
+  }, [roomId]);
+
+  const sendMessage = (username: string, message: string) => {
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
+
+    const payload = {
+      action: "send_message",
+      room_id: roomId,
+      username,
+      message,
+    };
+
+    socketRef.current.send(JSON.stringify(payload));
   };
 
-  const deleteRoom = (room_id: string) => {
-    socketRef.current?.send(
-      JSON.stringify({
-        action: "delete_room",
-        room_id,
-        username,
-      })
-    );
-  };
-
-  return {
-    rooms,
-    activeRoomId,
-    setActiveRoomId,
-    createRoom,
-    deleteRoom,
-    socket: socketRef.current,
-  };
-}
+  return { messages, sendMessage };
+};
